@@ -1,4 +1,6 @@
 #include "HID.h"
+#include "Keyboard.h"
+
 
 #include <Arduino.h>
 #include "Adafruit_TinyUSB.h"
@@ -234,14 +236,15 @@ Adafruit_USBD_HID usb_hid;
 
 void HID::begin(void) {
   Bluefruit.begin();
-  Bluefruit.setName("Kinesis BLEx");
-  Bluefruit.setTxPower(0);
+  Bluefruit.setName("Bluefruit52");
+  Bluefruit.setTxPower(4);
   Bluefruit.autoConnLed(false);
 
-  bleDIS.setManufacturer("Bluetooth");
-  bleDIS.setModel("Bluetooth");
+  bleDIS.setManufacturer("Adafruit Industries");
+  bleDIS.setModel("Bluefruit Feather 52");
   
   bleDIS.begin();
+
   bleHID.begin();
 
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
@@ -264,6 +267,10 @@ void HID::begin(void) {
   USBDevice.setManufacturerDescriptor("USB");
 }
 
+void HID::setKeyboard(Keyboard *kb) {
+  keyboard = kb;
+}
+
 void HID::sendKeys(
   const Keymap *km
 ) {  
@@ -284,6 +291,8 @@ void HID::sendKeys(
       case Keymap::Key::Shift:
         report.modifier |= modifers[(int)HID::Mod::Shift]; break;
       case Keymap::Key::Sym: break;
+      case Keymap::Key::Cmd:
+        report.modifier |= modifers[(int)HID::Mod::LCmd]; break;        
 
       case Keymap::Key::SL5:
         report.modifier |= modifers[(int)HID::Mod::LAlt]; break;
@@ -298,24 +307,9 @@ void HID::sendKeys(
       case Keymap::Key::SR6:
             report.modifier |= modifers[(int)HID::Mod::RCmd]; break;
       case Keymap::Key::KY: //Make KY disconnect bluetooth.
-        #ifdef DEBUG
-          Serial.begin(115200);
-          while ( !Serial ) delay(10);   // for nrf52840 with native USB
-
-          Serial.println("----- Before -----\n");
-          bond_print_list(BLE_GAP_ROLE_PERIPH);
-          bond_print_list(BLE_GAP_ROLE_CENTRAL);
-        #endif
-
-        //  Bluefruit.disconnect();
-
-        #ifdef DEBUG
-          Serial.println();
-          Serial.println("----- After  -----\n");
-
-          bond_print_list(BLE_GAP_ROLE_PERIPH);
-          bond_print_list(BLE_GAP_ROLE_CENTRAL);
-        #endif
+        if (keyboard) {
+          keyboard->indicateBatteryLevel();
+        }
         break;
      
       default: {
@@ -333,12 +327,11 @@ void HID::sendKeys(
   if(!setReport) {
     return;
   }
-  
+
   if(usb_hid.ready()) {
     usb_hid.sendReport(0, &report, sizeof(report));
     return;
   }
-  
   bleHID.keyboardReport(&report);      
 }
 

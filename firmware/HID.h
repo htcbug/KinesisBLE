@@ -5,12 +5,15 @@
 
 #include "KeyMap.h"
 
+class Keyboard;
+
 class HID {
   public:
     HID(void);
     void begin(void);
     void sendKeys(const Keymap *km);
     bool isUSB(void);
+    void setKeyboard(Keyboard *kb);
   private:
 
     enum class Scancode : uint8_t {
@@ -47,6 +50,8 @@ class HID {
     BLEHidAdafruit bleHID;
     BLEDis bleDIS;
     hid_keyboard_report_t report;
+    Keyboard *keyboard;
+    
 
     static const uint8_t scancodes[];
     static const uint8_t modifers[];

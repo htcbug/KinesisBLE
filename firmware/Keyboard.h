@@ -15,6 +15,8 @@ class Keyboard {
     void update(void);
     void restCheck(void);
     void sleepCheck(void);    
+    void indicateBatteryLevel(void);
+
 
   private:
     Matrix matrix;
@@ -24,7 +26,6 @@ class Keyboard {
     Power power;
     RestTimer restTimer;
     unsigned long idleTime;
-    void indicateBatteryLevel(void);
     unsigned long batteryLEDOnDuration;
 
     static const uint8_t sleepMinutes = 10;

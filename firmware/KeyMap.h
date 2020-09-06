@@ -25,7 +25,7 @@ class Keymap {
 
       LShift, RShift, SL5, SL6, SR5, SR6, PG,
 
-      Ctrl, Shift, Alt, 
+      Ctrl, Shift, Alt, Cmd,
       
       Sym,
       Count,

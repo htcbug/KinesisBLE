@@ -5,9 +5,9 @@ Keyboard keyboard;
 LED led;
 
 void setup(void) {
-#if DEBUG
-  Serial.begin(9600);
-#endif
+//  Serial.begin(115200);
+//  while ( !Serial ) delay(10);   // for nrf52840 with native usb
+
   keyboard.begin();
 }
 

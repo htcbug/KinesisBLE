@@ -9,9 +9,11 @@ Keyboard::Keyboard(void)
 }
 
 void Keyboard::begin(void) {
+  hid.setKeyboard(this);
   hid.begin();
   matrix.begin();
   led.begin();
+
   indicateBatteryLevel();
 }
 
@@ -35,7 +37,6 @@ void Keyboard::update(void) {
 }
 
 void Keyboard::indicateBatteryLevel(void) {
-  
   uint8_t percentage = power.batteryRemainingPercentage();
   
   if(percentage > 75) {
