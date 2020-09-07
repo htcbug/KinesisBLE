@@ -75,9 +75,9 @@ const uint8_t HID::scancodes[] = {
   [(int)Scancode::F11] = 0x44,
   [(int)Scancode::F12] = 0x45,
 
-  [(int)Scancode::PrintScrn] = 0x68,
-  [(int)Scancode::ScrollLock] = 0x69,
-  [(int)Scancode::Pause] = 0x6A,
+  [(int)Scancode::PrintScrn] = 0x46,
+  [(int)Scancode::ScrollLock] = 0x47,
+  [(int)Scancode::Pause] = 0x48,
   [(int)Scancode::Insert] = 0x49,
 
   [(int)Scancode::Home] = 0x4a,
