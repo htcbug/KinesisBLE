@@ -292,20 +292,19 @@ void HID::sendKeys(
         report.modifier |= modifers[(int)HID::Mod::Shift]; break;
       case Keymap::Key::Sym: break;
       case Keymap::Key::Cmd:
-        report.modifier |= modifers[(int)HID::Mod::RCmd]; break;        
-
+        report.modifier |= modifers[(int)HID::Mod::LCmd]; break;        
       case Keymap::Key::SL5:
         report.modifier |= modifers[(int)HID::Mod::LAlt]; break;
       case Keymap::Key::LShift:
         report.modifier |= modifers[(int)HID::Mod::LShift]; break;
       case Keymap::Key::SL6:
-        report.modifier |= modifers[(int)HID::Mod::LCmd]; break;        
+        report.modifier |= modifers[(int)HID::Mod::RCmd]; break;        
       case Keymap::Key::RShift:
         report.modifier |= modifers[(int)HID::Mod::RShift]; break;
       case Keymap::Key::SR5:
         report.modifier |= modifers[(int)HID::Mod::RCtrl]; break;
       case Keymap::Key::SR6:
-            report.modifier |= modifers[(int)HID::Mod::RCmd]; break;
+        report.modifier |= modifers[(int)HID::Mod::RCmd]; break;
       case Keymap::Key::KY: //Make KY disconnect bluetooth.
         if (keyboard) {
           keyboard->indicateBatteryLevel();
