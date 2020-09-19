@@ -1,4 +1,6 @@
 #include "HID.h"
+#include "Keyboard.h"
+
 
 #include <Arduino.h>
 #include "Adafruit_TinyUSB.h"
@@ -72,6 +74,12 @@ const uint8_t HID::scancodes[] = {
   [(int)Scancode::F10] = 0x43,
   [(int)Scancode::F11] = 0x44,
   [(int)Scancode::F12] = 0x45,
+
+  [(int)Scancode::PrintScrn] = 0x46,
+  [(int)Scancode::ScrollLock] = 0x47,
+  [(int)Scancode::Pause] = 0x48,
+  [(int)Scancode::Insert] = 0x49,
+
   [(int)Scancode::Home] = 0x4a,
   [(int)Scancode::PgUp] = 0x4b,
   [(int)Scancode::Del] = 0x4c,
@@ -145,7 +153,7 @@ const HID::KeyInfo HID::scancodeMap[] = {
   [(int)Keymap::Key::Tab] = { .scancode = Scancode::Tab, .shift = false },
   [(int)Keymap::Key::Space] = { .scancode = Scancode::Space, .shift = false },
   [(int)Keymap::Key::Minus] = { .scancode = Scancode::Minus, .shift = false },
-  [(int)Keymap::Key::Equal] = { .scancode = Scancode::Grave, .shift = false },
+  [(int)Keymap::Key::Equal] = { .scancode = Scancode::Equal, .shift = false },
   [(int)Keymap::Key::LBrace] = { .scancode = Scancode::LBrace, .shift = false },
   [(int)Keymap::Key::RBrace] = { .scancode = Scancode::RBrace, .shift = false },
   [(int)Keymap::Key::BSlash] = { .scancode = Scancode::BSlash, .shift = false },
@@ -185,9 +193,10 @@ const HID::KeyInfo HID::scancodeMap[] = {
   [(int)Keymap::Key::F10] = { .scancode = Scancode::F10, .shift = false },
   [(int)Keymap::Key::F11] = { .scancode = Scancode::F11, .shift = false },
   [(int)Keymap::Key::F12] = { .scancode = Scancode::F12, .shift = false },
-  [(int)Keymap::Key::PrintScr] = { .scancode = Scancode::None, .shift = false },
-  [(int)Keymap::Key::ScrollLock] = { .scancode = Scancode::None, .shift = false },
-  [(int)Keymap::Key::Pause] = { .scancode = Scancode::None, .shift = false },
+  [(int)Keymap::Key::PrintScrn] = { .scancode = Scancode::PrintScrn, .shift = false },
+  [(int)Keymap::Key::ScrollLock] = { .scancode = Scancode::ScrollLock, .shift = false },
+  [(int)Keymap::Key::Pause] = { .scancode = Scancode::Pause, .shift = false },
+  [(int)Keymap::Key::Insert] = { .scancode = Scancode::Insert, .shift = false },
   [(int)Keymap::Key::Home] = { .scancode = Scancode::Home, .shift = false },
   [(int)Keymap::Key::PgUp] = { .scancode = Scancode::PgUp, .shift = false },
   [(int)Keymap::Key::Del] = { .scancode = Scancode::Del, .shift = false },
@@ -198,14 +207,19 @@ const HID::KeyInfo HID::scancodeMap[] = {
   [(int)Keymap::Key::Down] = { .scancode = Scancode::Down, .shift = false },
   [(int)Keymap::Key::Up] = { .scancode = Scancode::Up, .shift = false },
 
-  [(int)Keymap::Key::Capslock] = { .scancode = Scancode::Esc, .shift = false },
-  [(int)Keymap::Key::Insert] = { .scancode = Scancode::BSlash, .shift = false },
-  [(int)Keymap::Key::SL1] = { .scancode = Scancode::Equal, .shift = false },
-  [(int)Keymap::Key::SL3] = { .scancode = Scancode::Hyper, .shift = false },
+  [(int)Keymap::Key::Capslock] = { .scancode = Scancode::Capslock, .shift = false },
+
+  [(int)Keymap::Key::SL1] = { .scancode = Scancode::End, .shift = false },
+  [(int)Keymap::Key::SL2] = { .scancode = Scancode::Home, .shift = false },
+  [(int)Keymap::Key::SL3] = { .scancode = Scancode::Del, .shift = false },
   [(int)Keymap::Key::SL4] = { .scancode = Scancode::BSpace, .shift = false },
-  [(int)Keymap::Key::SR1] = { .scancode = Scancode::Minus, .shift = false },
+
+  [(int)Keymap::Key::SR1] = { .scancode = Scancode::PgDn, .shift = false },
+  [(int)Keymap::Key::SR2] = { .scancode = Scancode::PgUp, .shift = false },
   [(int)Keymap::Key::SR3] = { .scancode = Scancode::Enter, .shift = false },
-  [(int)Keymap::Key::SR4] = { .scancode = Scancode::Space, .shift = false }
+  [(int)Keymap::Key::SR4] = { .scancode = Scancode::Space, .shift = false },
+
+  [(int)Keymap::Key::KY] = { .scancode = Scancode::None, .shift = false }
 };
 
 HID::HID(void)
@@ -222,14 +236,15 @@ Adafruit_USBD_HID usb_hid;
 
 void HID::begin(void) {
   Bluefruit.begin();
-  Bluefruit.setName("Kinesis BLEx");
-  Bluefruit.setTxPower(0);
+  Bluefruit.setName("Bluefruit52");
+  Bluefruit.setTxPower(4);
   Bluefruit.autoConnLed(false);
 
-  bleDIS.setManufacturer("Bluetooth");
-  bleDIS.setModel("Bluetooth");
+  bleDIS.setManufacturer("Adafruit Industries");
+  bleDIS.setModel("Bluefruit Feather 52");
   
   bleDIS.begin();
+
   bleHID.begin();
 
   Bluefruit.Advertising.addFlags(BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE);
@@ -252,6 +267,10 @@ void HID::begin(void) {
   USBDevice.setManufacturerDescriptor("USB");
 }
 
+void HID::setKeyboard(Keyboard *kb) {
+  keyboard = kb;
+}
+
 void HID::sendKeys(
   const Keymap *km
 ) {  
@@ -272,26 +291,26 @@ void HID::sendKeys(
       case Keymap::Key::Shift:
         report.modifier |= modifers[(int)HID::Mod::Shift]; break;
       case Keymap::Key::Sym: break;
-
-      case Keymap::Key::SL2:
-        report.modifier |= modifers[(int)HID::Mod::LCtrl]; break;
+      case Keymap::Key::Cmd:
+        report.modifier |= modifers[(int)HID::Mod::LCmd]; break;        
       case Keymap::Key::SL5:
         report.modifier |= modifers[(int)HID::Mod::LAlt]; break;
       case Keymap::Key::LShift:
         report.modifier |= modifers[(int)HID::Mod::LShift]; break;
       case Keymap::Key::SL6:
-        report.modifier |= modifers[(int)HID::Mod::LCmd]; break;        
-      case Keymap::Key::SR2:
-        report.modifier |= modifers[(int)HID::Mod::RAlt]; break;
+        report.modifier |= modifers[(int)HID::Mod::RCmd]; break;        
       case Keymap::Key::RShift:
         report.modifier |= modifers[(int)HID::Mod::RShift]; break;
       case Keymap::Key::SR5:
         report.modifier |= modifers[(int)HID::Mod::RCtrl]; break;
       case Keymap::Key::SR6:
         report.modifier |= modifers[(int)HID::Mod::RCmd]; break;
-      case Keymap::Key::Grave:
-        report.modifier |= modifers[(int)HID::Mod::LCtrl]; break;                      
-      
+      case Keymap::Key::KY: //Make KY disconnect bluetooth.
+        if (keyboard) {
+          keyboard->indicateBatteryLevel();
+        }
+        break;
+     
       default: {
         auto info = scancodeMap[(int)key];
        
@@ -307,12 +326,11 @@ void HID::sendKeys(
   if(!setReport) {
     return;
   }
-  
+
   if(usb_hid.ready()) {
     usb_hid.sendReport(0, &report, sizeof(report));
     return;
   }
-  
   bleHID.keyboardReport(&report);      
 }
 

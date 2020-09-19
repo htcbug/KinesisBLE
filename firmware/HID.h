@@ -5,12 +5,15 @@
 
 #include "KeyMap.h"
 
+class Keyboard;
+
 class HID {
   public:
     HID(void);
     void begin(void);
     void sendKeys(const Keymap *km);
     bool isUSB(void);
+    void setKeyboard(Keyboard *kb);
   private:
 
     enum class Scancode : uint8_t {
@@ -22,6 +25,8 @@ class HID {
       Tilde, Semicolon, SQuote, Grave, Comma, Period, Slash,
 
       F1, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
+
+      PrintScrn, ScrollLock, Pause, Insert,
 
       Home, PgUp, Del, End, PgDn, Right, Left, Down, Up, 
       
@@ -45,6 +50,8 @@ class HID {
     BLEHidAdafruit bleHID;
     BLEDis bleDIS;
     hid_keyboard_report_t report;
+    Keyboard *keyboard;
+    
 
     static const uint8_t scancodes[];
     static const uint8_t modifers[];
